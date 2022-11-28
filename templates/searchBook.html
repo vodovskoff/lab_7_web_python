@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" type="text/css" href="/static/CSS/style.css"/>
+    <style>
+        .card{
+            padding: 16px;
+            background: gainsboro;
+            margin: 18px;
+            border-radius: 17px;
+            min-width: 270px;
+        }
+    </style>
+    {% macro filters(rel, checked, label, type) %}
+    {% set n = len(rel) %}
+    <fieldset name="{{label}}" style="max-width: 200px; margin-bottom: 10px">
+        <p>{{ label }}</p>
+        {% for i in range(n) %}
+        <div>
+            {% set id_r = rel.loc[i, rel.columns[0]] %}
+            {% if id_r in checked %}
+                <input type="checkbox" name="{{ type }}[]" value="{{ rel.loc[i, rel.columns[0]] }}" checked="true">
+                <label>{{ rel.loc[i, rel.columns[1]] }}</label>
+            {% else %}
+                <input name="{{ type }}[]" value="{{ rel.loc[i, rel.columns[0]] }}" type="checkbox">
+                <label>{{ rel.loc[i, rel.columns[1]] }}</label>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </fieldset>
+    {% endmacro %}
+
+    {% macro list(rel, checked, label) %}
+    <div style="margin: 30px">
+        <p style="color: deeppink; margin: 1px"><b> {{ label }}: </b>
+        {% set n = len(rel) %}
+        {% for i in range(n) %}
+            {% set id_r = rel.loc[i, rel.columns[0]] %}
+            {% if int(id_r) in checked %}
+                    <li>{{ rel.loc[i, rel.columns[1]] }}</li>
+            {% endif %}
+        {% endfor %}
+    </p>
+    </div>
+    {% endmacro %}
+
+    {% macro cards(card) %}
+    {% set n = len(card) %}
+    {% for i in range(n) %}
+        <div class="card">
+            {% for name in card.dtypes.index %}
+            {% if name != 'book_id' %}
+            <p><b>{{ name }}:</b> {{ card.loc[i, name] }}</p>
+                {% endif %}
+            {% endfor %}
+            <div>
+                {% if card.loc[i, 'Количество']>0 %}
+                <form action="{{ url_for('searchBook') }}" method="get">
+                <input name="reader_id" value="{{user_id}}" type="hidden"></input>
+                <input name="borrow_book_id" value="{{card.loc[i, 'book_id']}}" type="hidden"></input>
+                <input name="submitBorrowBook" value="Выбрать" type="submit"></input>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+    {% endfor %}
+    {% endmacro %}
+    <meta charset="UTF-8">
+    <title>Подбор книг</title>
+</head>
+<body>
+    <div class=menu>
+    <ul>
+        <li><a href={{ url_for("index") }}>Читатель</a></li>
+        <li class=active><a href={{ url_for("searchBook") }}>Книги</a></li>
+        <li><a href={{ url_for("index") }}>Статистика</a></li>
+    </ul>
+    </div>
+<div style="display: inline-flex">
+    <div style="min-width: 250px">
+        <form action="{{ url_for('searchBook') }}" method="get">
+            {{filters(df_authors, checked_authors, 'Авторы', 'authors')}}
+            {{filters(df_genres, checked_genres, 'Жанры', 'genres')}}
+            {{filters(df_publishers, checked_publishers, 'Издатели', 'publishers')}}
+            <br>
+            <button type="submit">Найти</button>
+        </form>
+    </div>
+    <div>
+        <div style="display: inline-flex">
+
+            {% if len(checked_authors)!=0%}
+                {{list(df_authors, checked_authors, 'Авторы')}}<br>
+            {% endif %}
+
+            {% if len(checked_genres)!=0%}
+                {{list(df_genres, checked_genres, 'Жанры')}}<br>
+            {% endif %}
+
+            {% if len(checked_publishers)!=0%}
+                {{list(df_publishers, checked_publishers, 'Издатели')}}
+            {% endif %}
+        </div>
+        <div style="display: flex; flex-wrap: wrap">
+            {{cards(card)}}
+        </div>
+    </div>
+</div>
+</body>
+</html>
