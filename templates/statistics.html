@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% macro render_table(table_name, relation) %}
+    {% if not relation.empty %}
+    <p>
+        <b>{{ table_name }} </b>
+    </p>
+    <table>
+        <tr>
+            {% for name in relation.dtypes.index %}
+            {% if name != id %}
+            <th>{{ name }}</th>
+            {% endif %}
+            {% endfor %}
+        </tr>
+        <tbody>
+        {% for i in range(len(relation)) %}
+        <tr>
+                {% for name in relation.dtypes.index %}
+            {% if name != id %}
+                <td>
+                    {{ relation.loc[i, name]}}
+                </td>
+
+            {% endif %}
+            {% endfor %}
+        {% endfor %}
+        </tr>
+        </tbody>
+    </table>
+    {% endif %}
+    {% endmacro %}
+    <link rel="stylesheet" type="text/css" href="/static/CSS/style.css"/>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <div class=menu>
+    <ul>
+        <li><a href={{ url_for("index") }}>Читатель</a></li>
+        <li><a href={{ url_for("searchBook") }}>Книги</a></li>
+        <li  class=active><a href={{ url_for("statistics") }}>Статистика</a></li>
+    </ul>
+    </div>
+        <form class="findForm" action="{{ url_for('statistics') }}" method="get">
+            <input type="date" required pattern="yyyy-mm-dd" placeholder="Начало периода" name="dateStart">
+            <input type="date" placeholder="Конец периода" name="dateEnd">
+            <input name="submitGetBorrowers" value="Найти должников" type="submit">
+        </form>
+
+        <form class="findForm" action="{{ url_for('statistics') }}" method="get">
+            <input type="date" placeholder="Начало периода" name="dateStart">
+            <input type="date" placeholder="Конец периода" name="dateEnd">
+            <input name="submitGetPopularBook" value="Найти самую популярную книгу" type="submit">
+        </form>
+
+    {{ render_table("Должники",borrowers_list) }}
+    {{ render_table("Самая популярная книга",most_popular_book_df) }}
+
+</body>
+</html>
